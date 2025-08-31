@@ -50,7 +50,7 @@ export default function SimpleJob({
       count += 1; // add quantization card
     }
     return count;
-    
+
   }, [modelArch]);
 
   let topBarClass = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6';
@@ -404,6 +404,7 @@ export default function SimpleJob({
                   options={[
                     { value: 'adamw8bit', label: 'AdamW8Bit' },
                     { value: 'adafactor', label: 'Adafactor' },
+                    { value: 'prodigy', label: 'Prodigy' },
                   ]}
                 />
                 <NumberInput
@@ -539,6 +540,82 @@ export default function SimpleJob({
                 )}
               </div>
             </div>
+          </Card>
+        </div>
+        <div>
+          <Card title="Optimizer Arguments">
+              { /* optimizer arguments */ }
+              { jobConfig.config.process[0].train.optimizer === 'adamw8bit' && <div>
+                No arguments for AdamW8Bit
+              </div> }
+              { jobConfig.config.process[0].train.optimizer === 'adafactor' && <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                <div>
+                <Checkbox
+                  label="Relative Step"
+                  className="pt-2"
+                  checked={jobConfig.config.process[0].train.optimizer_params.relative_step || false}
+                  onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.relative_step')}
+                />
+                <Checkbox
+                  label="Scale Parameter"
+                  className="pt-2"
+                  checked={jobConfig.config.process[0].train.optimizer_params.scale_parameter || false}
+                  onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.scale_parameter')}
+                />
+                <Checkbox
+                  label="Warmup Init"
+                  className="pt-2"
+                  checked={jobConfig.config.process[0].train.optimizer_params.warmup_init || false}
+                  onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.warmup_init')}
+                />
+                </div>
+              </div> }
+              { jobConfig.config.process[0].train.optimizer === 'prodigy' && <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                <div>
+                  <NumberInput
+                    label="D Coefficient"
+                    value={jobConfig.config.process[0].train.optimizer_params.d_coef}
+                    onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.d_coef')}
+                    placeholder="eg. 1.0"
+                    min={0}
+                  />
+                  <NumberInput
+                    label="D0"
+                    value={jobConfig.config.process[0].train.optimizer_params.d0}
+                    onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.d0')}
+                    placeholder="eg. 1.0"
+                    min={0}
+                  />
+                </div>
+                <div>
+                  <Checkbox
+                    label="Decouple Decay"
+                    className="pt-2"
+                    checked={jobConfig.config.process[0].train.optimizer_params.decouple || false}
+                    onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.decouple')}
+                  />
+                  <Checkbox
+                    label="Use Bias Correction"
+                    className="pt-2"
+                    checked={jobConfig.config.process[0].train.optimizer_params.use_bias_correction || false}
+                    onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.use_bias_correction')}
+                  />
+                  <Checkbox
+                    label="Safeguard Warmup"
+                    className="pt-2"
+                    checked={jobConfig.config.process[0].train.optimizer_params.safeguard_warmup || false}
+                    onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.safeguard_warmup')}
+                  />
+                </div>
+                <div>
+                  <TextInput
+                    label="Betas"
+                    value={(jobConfig.config.process[0].train.optimizer_params.betas || []).join(',')}
+                    onChange={value => setJobConfig(value.split(','), 'config.process[0].train.optimizer_params.betas')}
+                    placeholder="eg. 0.9,0.999"
+                  />
+                </div>
+              </div> }
           </Card>
         </div>
         <div>
