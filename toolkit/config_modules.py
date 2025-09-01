@@ -986,7 +986,8 @@ class GenerateImageConfig:
         self.fps = fps
         self.ctrl_img = ctrl_img
         self.ctrl_idx = ctrl_idx
-        
+        self.upload_samples = os.getenv('UPLOAD_SAMPLES', 'true').lower() == 'true'
+
 
         # prompt string will override any settings above
         self._process_prompt_string()
@@ -1195,14 +1196,17 @@ class GenerateImageConfig:
     ):
         # this is called after prompt embeds are encoded. We can override them in the future here
         pass
-    
+
     def log_image(self, image, count: int = 0, max_count=0):
         if self.logger is None:
             return
 
+        if not self.upload_samples:
+            return
+
         self.logger.log_image(image, count, self.prompt)
-        
-        
+
+
 def validate_configs(
     train_config: TrainConfig,
     model_config: ModelConfig,

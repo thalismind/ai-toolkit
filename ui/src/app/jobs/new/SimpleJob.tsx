@@ -444,12 +444,6 @@ export default function SimpleJob({
                   min={0}
                   required
                 />
-                <Checkbox
-                  label="Use Lookahead"
-                  className="pt-2"
-                  checked={jobConfig.config.process[0].train.optimizer_params.use_lookahead || false}
-                  onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.use_lookahead')}
-                />
                 <NumberInput
                   label="Weight Decay"
                   className="pt-2"
@@ -572,6 +566,38 @@ export default function SimpleJob({
                     />
                   </>
                 )}
+              </div>
+            </div>
+          </Card>
+        </div>
+        <div>
+          <Card title="Lookahead Arguments">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div>
+                <Checkbox
+                  label="Use Lookahead"
+                  className="pt-2"
+                  checked={jobConfig.config.process[0].train.optimizer_params.use_lookahead || false}
+                  onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.use_lookahead')}
+                />
+              </div>
+              <div>
+                <NumberInput
+                  label="Lookahead K"
+                  className="pt-2"
+                  value={jobConfig.config.process[0].train.optimizer_params.lookahead_k || 6}
+                  onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.lookahead_k')}
+                  placeholder="eg. 5"
+                  min={1}
+                />
+                <NumberInput
+                  label="Lookahead Alpha"
+                  className="pt-2"
+                  value={jobConfig.config.process[0].train.optimizer_params.lookahead_alpha || 0.5}
+                  onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.lookahead_alpha')}
+                  placeholder="eg. 0.5"
+                  min={0}
+                />
               </div>
             </div>
           </Card>

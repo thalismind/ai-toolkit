@@ -15,8 +15,8 @@ def get_optimizer(
     use_lookahead = False
     lookahead_k = 6
     lookahead_alpha = 0.5
-    if lower_type.startswith("lookahead."):
-        use_lookahead = True
+    if "use_lookahead" in optimizer_params:
+        use_lookahead = optimizer_params.pop("use_lookahead", use_lookahead)
         lookahead_k = int(optimizer_params.pop("lookahead_k", lookahead_k))
         lookahead_alpha = float(optimizer_params.pop("lookahead_alpha", lookahead_alpha))
         lower_type = lower_type.removeprefix("lookahead.")
