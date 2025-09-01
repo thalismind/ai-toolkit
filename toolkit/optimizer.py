@@ -24,10 +24,32 @@ def get_optimizer(
     if lower_type.startswith("optim."):
         lower_type = lower_type.removeprefix("optim.")
         print(f"Using extended optimizer {lower_type}")
-        if lower_type == "adabelief":
+        if lower_type == "a2gradexp":
+            optimizer = optim.A2GradExp(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "a2gradinc":
+            optimizer = optim.A2GradInc(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "a2graduni":
+            optimizer = optim.A2GradUni(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "accsgd":
+            optimizer = optim.AccSGD(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "adabelief":
             optimizer = optim.AdaBelief(params, lr=learning_rate, **optimizer_params)
         elif lower_type == "adabound":
             optimizer = optim.AdaBound(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "adamod":
+            optimizer = optim.AdaMod(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "adahessian":
+            optimizer = optim.AdaHessian(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "adamp":
+            optimizer = optim.AdamP(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "aggmo":
+            optimizer = optim.AggMo(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "apollo":
+            optimizer = optim.Apollo(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "diffgrad":
+            optimizer = optim.DiffGrad(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "lamb":
+            optimizer = optim.Lamb(params, lr=learning_rate, **optimizer_params)
         elif lower_type == "madgrad":
             optimizer = optim.MADGRAD(params, lr=learning_rate, **optimizer_params)
         elif lower_type == "novograd":
@@ -36,8 +58,24 @@ def get_optimizer(
             optimizer = optim.PID(params, lr=learning_rate, **optimizer_params)
         elif lower_type == "qhadam":
             optimizer = optim.QHAdam(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "qhm":
+            optimizer = optim.QHM(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "radam":
+            optimizer = optim.RAdam(params, lr=learning_rate, **optimizer_params)
         elif lower_type == "ranger":
             optimizer = optim.Ranger(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "rangerqh":
+            optimizer = optim.RangerQH(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "rangerva":
+            optimizer = optim.RangerVA(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "sgdp":
+            optimizer = optim.SGDP(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "sgdw":
+            optimizer = optim.SGDW(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "swats":
+            optimizer = optim.SWATS(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "shampoo":
+            optimizer = optim.Shampoo(params, lr=learning_rate, **optimizer_params)
         elif lower_type == "yogi":
             optimizer = optim.Yogi(params, lr=learning_rate, **optimizer_params)
         else:
