@@ -583,7 +583,7 @@ export default function SimpleJob({
                     label="D0"
                     value={jobConfig.config.process[0].train.optimizer_params.d0}
                     onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.d0')}
-                    placeholder="eg. 1.0"
+                    placeholder="eg. 1e-6"
                     min={0}
                   />
                 </div>

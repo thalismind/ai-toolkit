@@ -1,4 +1,5 @@
 import torch
+import torch_optimizer as optim
 
 
 def get_optimizer(
@@ -10,7 +11,34 @@ def get_optimizer(
     if optimizer_params is None:
         optimizer_params = {}
     lower_type = optimizer_type.lower()
-    if lower_type.startswith("dadaptation"):
+
+    use_lookahead = False
+    lookahead_k = 6
+    lookahead_alpha = 0.5
+    if lower_type.startswith("lookahead."):
+        use_lookahead = True
+        lookahead_k = int(optimizer_params.pop("lookahead_k", lookahead_k))
+        lookahead_alpha = float(optimizer_params.pop("lookahead_alpha", lookahead_alpha))
+        lower_type = lower_type.removeprefix("lookahead.")
+
+    if lower_type.startswith("optim."):
+        lower_type = lower_type.removeprefix("optim.")
+        print(f"Using extended optimizer {lower_type}")
+        if lower_type == "madgrad":
+            optimizer = optim.MADGRAD(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "novograd":
+            optimizer = optim.Novograd(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "pid":
+            optimizer = optim.PID(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "qhadam":
+            optimizer = optim.QHAdam(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "ranger":
+            optimizer = optim.Ranger(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "yogi":
+            optimizer = optim.Yogi(params, lr=learning_rate, **optimizer_params)
+        else:
+            raise ValueError(f"Unknown optimizer type {optimizer_type}")
+    elif lower_type.startswith("dadaptation"):
         # dadaptation optimizer does not use standard learning rate. 1 is the default value
         import dadaptation
         print("Using DAdaptAdam optimizer")
@@ -99,4 +127,8 @@ def get_optimizer(
         optimizer = Automagic(params, lr=float(learning_rate), **optimizer_params)
     else:
         raise ValueError(f'Unknown optimizer type {optimizer_type}')
+
+    if use_lookahead:
+        optimizer = optim.Lookahead(optimizer, k=lookahead_k, alpha=lookahead_alpha)
+
     return optimizer
