@@ -24,7 +24,11 @@ def get_optimizer(
     if lower_type.startswith("optim."):
         lower_type = lower_type.removeprefix("optim.")
         print(f"Using extended optimizer {lower_type}")
-        if lower_type == "madgrad":
+        if lower_type == "adabelief":
+            optimizer = optim.AdaBelief(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "adabound":
+            optimizer = optim.AdaBound(params, lr=learning_rate, **optimizer_params)
+        elif lower_type == "madgrad":
             optimizer = optim.MADGRAD(params, lr=learning_rate, **optimizer_params)
         elif lower_type == "novograd":
             optimizer = optim.Novograd(params, lr=learning_rate, **optimizer_params)

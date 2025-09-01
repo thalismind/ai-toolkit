@@ -406,6 +406,8 @@ export default function SimpleJob({
                     { value: 'adafactor', label: 'Adafactor' },
                     { value: 'prodigy', label: 'Prodigy' },
                     { value: 'prodigy_plus_schedule_free', label: 'Prodigy+ScheduleFree' },
+                    { value: 'optim.adabelief', label: 'AdaBelief' },
+                    { value: 'optim.adabound', label: 'AdaBound' },
                     { value: 'optim.madgrad', label: 'MADGRAD' },
                     { value: 'optim.novograd', label: 'Novograd' },
                     { value: 'optim.pid', label: 'PID' },
@@ -577,7 +579,7 @@ export default function SimpleJob({
                 />
                 </div>
               </div> }
-              { jobConfig.config.process[0].train.optimizer === 'prodigy' && <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              { jobConfig.config.process[0].train.optimizer.includes('prodigy') && <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 <div>
                   <NumberInput
                     label="D Coefficient"
