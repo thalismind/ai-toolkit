@@ -405,6 +405,13 @@ export default function SimpleJob({
                     { value: 'adamw8bit', label: 'AdamW8Bit' },
                     { value: 'adafactor', label: 'Adafactor' },
                     { value: 'prodigy', label: 'Prodigy' },
+                    { value: 'prodigy_plus_schedule_free', label: 'Prodigy+ScheduleFree' },
+                    { value: 'optim.madgrad', label: 'MADGRAD' },
+                    { value: 'optim.novograd', label: 'Novograd' },
+                    { value: 'optim.pid', label: 'PID' },
+                    { value: 'optim.qhadam', label: 'QHAdam' },
+                    { value: 'optim.ranger', label: 'Ranger' },
+                    { value: 'optim.yogi', label: 'Yogi' },
                   ]}
                 />
                 <NumberInput

@@ -55,6 +55,10 @@ def get_optimizer(
             optimizer = dadaptation.DAdaptAdam(params, eps=1e-6, lr=use_lr, **optimizer_params)
             # warn user that dadaptation is deprecated
             print("WARNING: Dadaptation optimizer type has been changed to DadaptationAdam. Please update your config.")
+    elif lower_type == "prodigy_plus_schedule_free":
+        from prodigyplus.prodigy_plus_schedulefree import ProdigyPlusScheduleFree
+        print("Using Prodigy+ScheduleFree optimizer")
+        optimizer = ProdigyPlusScheduleFree(params, lr=learning_rate, **optimizer_params)
     elif lower_type.startswith("prodigy8bit"):
         from toolkit.optimizers.prodigy_8bit import Prodigy8bit
         print("Using Prodigy optimizer")
