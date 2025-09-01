@@ -115,6 +115,21 @@ export interface TrainConfig {
   cache_text_embeddings: boolean;
   optimizer_params: {
     weight_decay: number;
+    // lookahead params
+    use_lookahead?: boolean;
+    lookahead_k?: number;
+    lookahead_alpha?: number;
+    // prodigy params
+    d_coef?: number;
+    d0?: number;
+    betas?: number[];
+    decouple?: boolean;
+    use_bias_correction?: boolean;
+    safeguard_warmup?: boolean;
+    // adafactor params
+    relative_step?: boolean;
+    scale_parameter?: boolean;
+    warmup_init?: boolean;
   };
   skip_first_sample: boolean;
   disable_sampling: boolean;

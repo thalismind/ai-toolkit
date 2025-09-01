@@ -444,6 +444,12 @@ export default function SimpleJob({
                   min={0}
                   required
                 />
+                <Checkbox
+                  label="Use Lookahead"
+                  className="pt-2"
+                  checked={jobConfig.config.process[0].train.optimizer_params.use_lookahead || false}
+                  onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.use_lookahead')}
+                />
                 <NumberInput
                   label="Weight Decay"
                   className="pt-2"
@@ -602,14 +608,14 @@ export default function SimpleJob({
                 <div>
                   <NumberInput
                     label="D Coefficient"
-                    value={jobConfig.config.process[0].train.optimizer_params.d_coef}
+                    value={jobConfig.config.process[0].train.optimizer_params.d_coef || 1.0}
                     onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.d_coef')}
                     placeholder="eg. 1.0"
                     min={0}
                   />
                   <NumberInput
                     label="D0"
-                    value={jobConfig.config.process[0].train.optimizer_params.d0}
+                    value={jobConfig.config.process[0].train.optimizer_params.d0 || 1e-6}
                     onChange={value => setJobConfig(value, 'config.process[0].train.optimizer_params.d0')}
                     placeholder="eg. 1e-6"
                     min={0}
