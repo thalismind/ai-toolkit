@@ -12,7 +12,7 @@ import torch
 from PIL import Image
 from PIL.ImageOps import exif_transpose
 from torchvision import transforms
-from torch.utils.data import Dataset, DataLoader, ConcatDataset
+from torch.utils.data import Dataset, DataLoader, ConcatDataset, random_split
 from tqdm import tqdm
 import albumentations as A
 
@@ -31,7 +31,7 @@ def is_native_windows():
 
 if TYPE_CHECKING:
     from toolkit.stable_diffusion_model import StableDiffusion
-    
+
 
 image_extensions = ['.jpg', '.jpeg', '.png', '.webp']
 video_extensions = ['.mp4', '.avi', '.mov', '.webm', '.mkv', '.wmv', '.m4v', '.flv']
@@ -432,7 +432,7 @@ class AiToolkitDataset(LatentCachingMixin, ControlCachingMixin, CLIPCachingMixin
                 self.caption_dict = json.load(f)
                 # keys are file paths
                 file_list = list(self.caption_dict.keys())
-                
+
         # remove items in the _controls_ folder
         file_list = [x for x in file_list if not os.path.basename(os.path.dirname(x)) == "_controls"]
 
@@ -466,14 +466,14 @@ class AiToolkitDataset(LatentCachingMixin, ControlCachingMixin, CLIPCachingMixin
         dataset_folder = self.dataset_path
         if not os.path.isdir(self.dataset_path):
             dataset_folder = os.path.dirname(dataset_folder)
-        
+
         dataset_size_file = os.path.join(dataset_folder, '.aitk_size.json')
         dataloader_version = "0.1.2"
         if os.path.exists(dataset_size_file):
             try:
                 with open(dataset_size_file, 'r') as f:
                     self.size_database = json.load(f)
-                
+
                 if "__version__" not in self.size_database or self.size_database["__version__"] != dataloader_version:
                     print_acc("Upgrading size database to new version")
                     # old version, delete and recreate
@@ -484,7 +484,7 @@ class AiToolkitDataset(LatentCachingMixin, ControlCachingMixin, CLIPCachingMixin
                 self.size_database = {}
         else:
             self.size_database = {}
-        
+
         self.size_database["__version__"] = dataloader_version
 
         bad_count = 0
@@ -512,7 +512,7 @@ class AiToolkitDataset(LatentCachingMixin, ControlCachingMixin, CLIPCachingMixin
         # save the size database
         with open(dataset_size_file, 'w') as f:
             json.dump(self.size_database, f)
-        
+
         if self.is_video:
             print_acc(f"  -  Found {len(self.file_list)} videos")
             assert len(self.file_list) > 0, f"no videos found in {self.dataset_path}"
@@ -601,11 +601,12 @@ def get_dataloader_from_datasets(
         dataset_options,
         batch_size=1,
         sd: 'StableDiffusion' = None,
-) -> DataLoader:
+) -> tuple[DataLoader, DataLoader]: # train, val
     if dataset_options is None or len(dataset_options) == 0:
         return None
 
-    datasets = []
+    train_datasets = []
+    validation_datasets = []
     has_buckets = False
     is_caching_latents = False
 
@@ -624,7 +625,16 @@ def get_dataloader_from_datasets(
 
         if config.type == 'image':
             dataset = AiToolkitDataset(config, batch_size=batch_size, sd=sd)
-            datasets.append(dataset)
+            validation_seed = config.validation_seed
+            validation_split = int(config.validation_split * len(dataset))
+            print(f"Validation split: {validation_split} out of {len(dataset)}")
+            train_dataset, validation_dataset = random_split(
+                dataset,
+                [validation_split, len(dataset) - validation_split],
+                generator=torch.Generator().manual_seed(validation_seed)
+            )
+            train_datasets.append(train_dataset)
+            validation_datasets.append(validation_dataset)
             if config.buckets:
                 has_buckets = True
             if config.cache_latents or config.cache_latents_to_disk:
@@ -632,7 +642,8 @@ def get_dataloader_from_datasets(
         else:
             raise ValueError(f"invalid dataset type: {config.type}")
 
-    concatenated_dataset = ConcatDataset(datasets)
+    concatenated_dataset = ConcatDataset(train_datasets)
+    concatenated_validation_dataset = ConcatDataset(validation_datasets)
 
     # todo build scheduler that can get buckets from all datasets that match
     # todo and evenly distribute reg images
@@ -647,7 +658,7 @@ def get_dataloader_from_datasets(
     # check if is caching latents
 
     dataloader_kwargs = {}
-    
+
     if is_native_windows():
         dataloader_kwargs['num_workers'] = 0
     else:
@@ -656,10 +667,10 @@ def get_dataloader_from_datasets(
 
     if has_buckets:
         # make sure they all have buckets
-        for dataset in datasets:
+        for dataset in train_datasets:
             assert dataset.dataset_config.buckets, f"buckets not found on dataset {dataset.dataset_config.folder_path}, you either need all buckets or none"
 
-        data_loader = DataLoader(
+        train_data_loader = DataLoader(
             concatenated_dataset,
             batch_size=None,  # we batch in the datasets for now
             drop_last=False,
@@ -667,15 +678,30 @@ def get_dataloader_from_datasets(
             collate_fn=dto_collation,  # Use the custom collate function
             **dataloader_kwargs
         )
+        validation_data_loader = DataLoader(
+            concatenated_validation_dataset,
+            batch_size=None,  # we batch in the datasets for now
+            drop_last=False,
+            shuffle=False,
+            collate_fn=dto_collation,  # Use the custom collate function
+            **dataloader_kwargs
+        )
     else:
-        data_loader = DataLoader(
+        train_data_loader = DataLoader(
             concatenated_dataset,
             batch_size=batch_size,
             shuffle=True,
             collate_fn=dto_collation,
             **dataloader_kwargs
         )
-    return data_loader
+        validation_data_loader = DataLoader(
+            concatenated_validation_dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            collate_fn=dto_collation,
+            **dataloader_kwargs
+        )
+    return train_data_loader, validation_data_loader
 
 
 def trigger_dataloader_setup_epoch(dataloader: DataLoader):
