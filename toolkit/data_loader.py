@@ -630,7 +630,7 @@ def get_dataloader_from_datasets(
             print(f"Validation split: {validation_split} out of {len(dataset)}")
             train_dataset, validation_dataset = random_split(
                 dataset,
-                [validation_split, len(dataset) - validation_split],
+                [1 - config.validation_split, config.validation_split],
                 generator=torch.Generator().manual_seed(validation_seed)
             )
             train_datasets.append(train_dataset)
@@ -644,6 +644,7 @@ def get_dataloader_from_datasets(
 
     concatenated_dataset = ConcatDataset(train_datasets)
     concatenated_validation_dataset = ConcatDataset(validation_datasets)
+    print(f"Training dataset: {len(concatenated_dataset)} images, validation dataset: {len(concatenated_validation_dataset)} images")
 
     # todo build scheduler that can get buckets from all datasets that match
     # todo and evenly distribute reg images
@@ -668,7 +669,7 @@ def get_dataloader_from_datasets(
     if has_buckets:
         # make sure they all have buckets
         for dataset in train_datasets:
-            assert dataset.dataset_config.buckets, f"buckets not found on dataset {dataset.dataset_config.folder_path}, you either need all buckets or none"
+            assert dataset.dataset.dataset_config.buckets, f"buckets not found on dataset {dataset.dataset_config.folder_path}, you either need all buckets or none"
 
         train_data_loader = DataLoader(
             concatenated_dataset,

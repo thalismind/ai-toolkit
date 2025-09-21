@@ -1977,8 +1977,11 @@ class SDTrainer(BaseSDTrainProcess):
         )
 
         if self.validate_config.validate_every is not None and self.step_num % self.validate_config.validate_every == 0:
+            print("\n")
+            print(f"Running validation on step {self.step_num} (validate every {self.validate_config.validate_every} steps)")
             validation_loss = self.hook_validation_loop(self.validation_data_loader)
-            loss_dict['validation_loss'] = validation_loss.item()
+            if validation_loss is not None:
+                loss_dict['validation_loss'] = validation_loss.item()
 
         self.end_of_training_loop()
 
@@ -1989,10 +1992,17 @@ class SDTrainer(BaseSDTrainProcess):
         Validation loop that evaluates model performance without updating weights.
         Similar to training but with no gradient calculations or optimizer steps.
         """
+        # print(type(batch), batch)
+        batch = list(iter(batch))
+        # print(type(batch), batch)
+
         if isinstance(batch, list):
             batch_list = batch
         else:
             batch_list = [batch]
+
+        if len(batch) == 0:
+            return None
 
         total_loss = None
 

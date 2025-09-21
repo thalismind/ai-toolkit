@@ -21,6 +21,8 @@ def get_optimizer(
         lookahead_alpha = float(optimizer_params.pop("lookahead_alpha", lookahead_alpha))
         lower_type = lower_type.removeprefix("lookahead.")
 
+    print(f"Using optimizer {lower_type} with lookahead {use_lookahead}")
+
     if lower_type.startswith("optim."):
         lower_type = lower_type.removeprefix("optim.")
         print(f"Using extended optimizer {lower_type}")
@@ -138,13 +140,13 @@ def get_optimizer(
         import bitsandbytes
 
         if lower_type == "adam8bit":
-            return bitsandbytes.optim.Adam8bit(params, lr=learning_rate, eps=1e-6, **optimizer_params)
+            optimizer = bitsandbytes.optim.Adam8bit(params, lr=learning_rate, eps=1e-6, **optimizer_params)
         if lower_type == "ademamix8bit":
-            return bitsandbytes.optim.AdEMAMix8bit(params, lr=learning_rate, eps=1e-6, **optimizer_params)
+            optimizer = bitsandbytes.optim.AdEMAMix8bit(params, lr=learning_rate, eps=1e-6, **optimizer_params)
         elif lower_type == "adamw8bit":
-            return bitsandbytes.optim.AdamW8bit(params, lr=learning_rate, eps=1e-6, **optimizer_params)
+            optimizer = bitsandbytes.optim.AdamW8bit(params, lr=learning_rate, eps=1e-6, **optimizer_params)
         elif lower_type == "lion8bit":
-            return bitsandbytes.optim.Lion8bit(params, lr=learning_rate, **optimizer_params)
+            optimizer = bitsandbytes.optim.Lion8bit(params, lr=learning_rate, **optimizer_params)
         else:
             raise ValueError(f'Unknown optimizer type {optimizer_type}')
     elif lower_type == 'adam':
@@ -174,6 +176,7 @@ def get_optimizer(
     else:
         raise ValueError(f'Unknown optimizer type {optimizer_type}')
 
+    print(f"Applying lookahead to optimizer: {use_lookahead}")
     if use_lookahead:
         optimizer = optim.Lookahead(optimizer, k=lookahead_k, alpha=lookahead_alpha)
 
